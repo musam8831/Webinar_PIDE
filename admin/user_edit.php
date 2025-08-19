@@ -18,13 +18,13 @@ if($_SERVER['REQUEST_METHOD']==='POST'){
 ?>
 <!doctype html><html><head><meta charset="utf-8"><title>Edit User</title>
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-</head><body class="p-3"><div class="container">
+</head><body class="p-3 bg-light"><div class="container">
 <h4>Edit User</h4>
-<form method="post">
-  <div class="mb-2"><label>Name</label><input name="name" class="form-control" value="<?=htmlspecialchars($u['name'])?>" required></div>
-  <div class="mb-2"><label>Email</label><input name="email" type="email" class="form-control" value="<?=htmlspecialchars($u['email'])?>" required></div>
-  <div class="mb-2"><label>New Password (leave blank to keep)</label><input name="password" type="password" class="form-control"></div>
-  <div class="mb-2"><label>Role</label><select name="role" class="form-select"><option value="user" <?= $u['role']=='user'?'selected':'' ?>>user</option><option value="admin" <?= $u['role']=='admin'?'selected':'' ?>>admin</option></select></div>
-  <button class="btn btn-primary">Save</button> <a href="users.php" class="btn btn-secondary">Cancel</a>
+<form method="post" class="card card-body shadow-sm bg-white">
+  <div class="mb-2"><label class="form-label">Name</label><input name="name" class="form-control" value="<?=htmlspecialchars($u['name'])?>" required></div>
+  <div class="mb-2"><label class="form-label">Email</label><input name="email" type="email" class="form-control" value="<?=htmlspecialchars($u['email'])?>" required></div>
+  <div class="mb-2"><label class="form-label">New Password (leave blank to keep)</label><input name="password" type="password" class="form-control"></div>
+  <div class="mb-2"><label class="form-label">Role</label><select name="role" class="form-select"><option value="user" <?= $u['role']=='user'?'selected':'' ?>>user</option><option value="admin" <?= $u['role']=='admin'?'selected':'' ?>>admin</option></select></div>
+  <div><button class="btn btn-primary">Save</button> <a href="users.php" class="btn btn-secondary">Cancel</a></div>
 </form>
 </div></body></html>

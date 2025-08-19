@@ -7,14 +7,18 @@ $stmt = $pdo->prepare('SELECT w.*, u.name AS initiator_name, u.email AS initiato
 $stmt->execute([$id]);
 $row = $stmt->fetch();
 if (!$row) { echo json_encode(['error'=>'Not found']); exit; }
+
 $me = $_SESSION['user'];
 $canDelete = ($me['role'] === 'admin') || ((int)$me['id'] === (int)$row['initiated_by']);
+
 header('Content-Type: application/json');
 echo json_encode([
   'id'=>$row['id'],
   'title'=>$row['title'],
   'start'=>gmdate('Y-m-d H:i', strtotime($row['start_at'])),
   'end'=>gmdate('Y-m-d H:i', strtotime($row['end_at'])),
+  'start_local'=> (new DateTime($row['start_at'].' UTC'))->setTimezone(new DateTimeZone(date_default_timezone_get()))->format('Y-m-d\TH:i'),
+  'end_local'=> (new DateTime($row['end_at'].' UTC'))->setTimezone(new DateTimeZone(date_default_timezone_get()))->format('Y-m-d\TH:i'),
   'initiator_name'=>$row['initiator_name'],
   'initiator_email'=>$row['initiator_email'],
   'can_delete'=>$canDelete

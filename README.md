@@ -1,14 +1,14 @@
-# Webinar Booking App — Full Build
+# Webinar Booking App
 
 Features
 - PHP + MySQL
 - User auth (login/logout)
 - Admin user CRUD (create, read, update, delete)
-- Webinar booking with conflict prevention
+- Webinar booking with conflict prevention (create & update both enforce no overlap)
 - Only initiator or admin can delete
-- Hover/tooltip shows webinar info
-- **Popup modal** to add/edit webinar (no prompts)
-- **Admin-only Yearly Dashboard** with 3 switchable layouts on one screen:
+- Tooltip on hover (no blinking; uses Tippy.js)
+- Popup modal to add/edit webinar (not prompts)
+- **Admin-only Yearly Dashboard** (single screen with a switcher):
   1) Heatmap-style grid
   2) Classic mini-calendar (12 months)
   3) Weekly Grid (Mon–Fri × 52 weeks)

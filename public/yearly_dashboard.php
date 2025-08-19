@@ -7,26 +7,7 @@ $year = (int)($_GET['year'] ?? date('Y'));
 <!doctype html><html><head><meta charset="utf-8"><title>Yearly Dashboard - <?= $year ?></title>
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
 <link href="../assets/css/styles.css" rel="stylesheet">
-<style>
-.heatmap { display:flex; flex-wrap:wrap; gap:2px; max-width: 820px; }
-.heatday { width:14px; height:14px; border-radius:2px; display:inline-block; }
-.heatlegend { display:flex; gap:6px; align-items:center; margin-top:8px; }
-.month-grid { display:grid; grid-template-columns: repeat(3,1fr); gap:12px; }
-.mini-month { border:1px solid #e3e3e3; padding:8px; background:#fff; }
-.mini-month table { width:100%; font-size:12px; }
-.day-cell { width:28px; height:24px; text-align:right; padding:2px; }
-.badge-count { font-size:10px; }
-.weekly-grid { width:100%; border-collapse: collapse; background:#fff; }
-.weekly-grid th, .weekly-grid td { border:1px solid #e7e7e7; vertical-align: top; padding:6px; font-size:12px; min-height:68px; }
-.weekly-grid th { background:#f8f9fa; position: sticky; top:0; z-index:1; }
-.week-label { width:64px; text-align:center; font-weight:600; }
-.cell-date { font-weight:600; font-size:12px; display:block; margin-bottom:4px; }
-.event-pill { background:#e6f0ff; border:1px solid #c7dcff; border-radius:6px; padding:2px 6px; margin:2px 0; display:block; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-.event-pill small { opacity:0.8; }
-.hidden { display:none; }
-.sticky-tools { position: sticky; top:0; z-index: 5; background:#fff; padding:8px 0; }
-</style>
-</head><body class="bg-light">
+</head><body>
 <?php include 'navbar.php'; ?>
 
 <div class="container">
@@ -44,7 +25,16 @@ $year = (int)($_GET['year'] ?? date('Y'));
   <div id="heatmapView">
     <h6>Heatmap</h6>
     <div id="heatmap" class="heatmap"></div>
-    <div class="heatlegend"><span>Less</span><div style="width:80px;display:flex;gap:4px;"><div style="width:14px;height:14px;background:#f0f0f0"></div><div style="width:14px;height:14px;background:#cfe9ff"></div><div style="width:14px;height:14px;background:#7fbfff"></div><div style="width:14px;height:14px;background:#2b8cff"></div></div><span>More</span></div>
+    <div class="heatlegend">
+      <span>Less</span>
+      <div style="width:80px;display:flex;gap:4px;">
+        <div style="width:14px;height:14px;background:#f0f0f0"></div>
+        <div style="width:14px;height:14px;background:#cfe9ff"></div>
+        <div style="width:14px;height:14px;background:#7fbfff"></div>
+        <div style="width:14px;height:14px;background:#2b8cff"></div>
+      </div>
+      <span>More</span>
+    </div>
   </div>
 
   <div id="calendarView" class="hidden">
@@ -60,7 +50,7 @@ $year = (int)($_GET['year'] ?? date('Y'));
     <div class="table-responsive">
       <table class="weekly-grid table">
         <thead>
-          <tr><th class="week-label">Week</th><th>Mon</th><th>Tue</th><th>Wed</th><th>Thu</th><th>Fri</th></tr>
+          <tr><th class="week-label">Week</</th><th>Mon</th><th>Tue</th><th>Wed</th><th>Thu</th><th>Fri</th></tr>
         </thead>
         <tbody id="weeklyGridBody"></tbody>
       </table>
@@ -77,7 +67,7 @@ $year = (int)($_GET['year'] ?? date('Y'));
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script>
 const year = <?= $year ?>;
-let currentView = 'heatmap';
+
 function dateToYMD(d){ return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
 function getColorForCount(count){ if(count<=0) return '#f0f0f0'; if(count===1) return '#cfe9ff'; if(count<=3) return '#7fbfff'; return '#2b8cff'; }
 
@@ -160,7 +150,6 @@ function buildWeeklyGrid(eventsByDate){
 }
 
 function setView(view){
-  currentView = view;
   document.getElementById('heatmapView').classList.toggle('hidden', view!=='heatmap');
   document.getElementById('calendarView').classList.toggle('hidden', view!=='mini');
   document.getElementById('weeklyGridView').classList.toggle('hidden', view!=='weekly');

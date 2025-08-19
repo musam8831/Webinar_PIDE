@@ -10,4 +10,12 @@ if (!$check->fetch()) {
   $ins->execute(['Administrator','admin@example.com',$hash,'admin']);
   echo "Admin created: admin@example.com / Admin@123\n";
 } else { echo "Admin already exists.\n"; }
+$checkUser = $pdo->prepare("SELECT id FROM users WHERE email = ?");
+$checkUser->execute(['user@example.com']);
+if (!$checkUser->fetch()) {
+  $hashUser = password_hash('User@123', PASSWORD_DEFAULT);
+  $insUser = $pdo->prepare("INSERT INTO users (name,email,password_hash,role) VALUES (?,?,?,?)");
+  $insUser->execute(['User','user@example.com',$hashUser,'user']);
+  echo "User created: user@example.com / User@123\n";
+} else { echo "User already exists.\n"; }
 echo "Setup complete.\n";
