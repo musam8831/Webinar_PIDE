@@ -18,4 +18,4 @@ if (!$checkUser->fetch()) {
   $insUser->execute(['User','user@example.com',$hashUser,'user']);
   echo "User created: user@example.com / User@123\n";
 } else { echo "User already exists.\n"; }
-echo "Setup complete.\n";
+echo "Setup complete.\n testing string added.";
