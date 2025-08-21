@@ -1,0 +1,202 @@
+/* ====== PIDE Theme ====== */
+:root {
+  --pide-green: #118C3C;
+  --pide-green-dark: #0D6E30;
+  --pide-gold: #DD9300;
+  --pide-gold-event: #57B370;
+  --pide-bg: #f5f5f5;
+  --pide-ink: #222222;
+}
+
+body {
+  background: var(--pide-bg);
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  color: var(--pide-ink);
+}
+
+/* Navbar is included via navbar.php; enforce brand colors if needed */
+.navbar,
+.navbar.navbar-dark {
+  background-color: var(--pide-green) !important;
+}
+
+.navbar-brand,
+.navbar .nav-link,
+.navbar .navbar-text {
+  color: #fff !important;
+}
+
+.btn-outline-light:hover {
+  color: var(--pide-green) !important;
+  background: #fff !important;
+}
+
+/* Calendar container card */
+.calendar-shell {
+  max-width: 1200px;
+  margin: 28px auto;
+}
+
+.calendar-card {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.12);
+  overflow: hidden;
+}
+
+.calendar-card .card-header {
+  background: #fff;
+  border: 0;
+  padding: 16px 20px;
+}
+
+.calendar-title {
+  margin: 0;
+  font-weight: 700;
+  color: var(--pide-green);
+  display: flex;
+  align-items: center;
+  gap: .5rem;
+}
+
+/* FullCalendar theming */
+.fc .fc-toolbar-title {
+  color: var(--pide-green);
+  font-weight: 700;
+  font-size: 1.25rem;
+}
+
+.fc .fc-button {
+  background: var(--pide-green);
+  border: none;
+  border-radius: .5rem;
+}
+
+.fc .fc-button:hover,
+.fc .fc-button:focus {
+  background: var(--pide-gold);
+  color: #000;
+}
+
+.fc .fc-button-primary:disabled {
+  background: #7a7a7a;
+  border: none;
+}
+
+.fc .fc-col-header-cell-cushion {
+  color: var(--pide-green);
+  font-weight: 600;
+}
+
+.fc-daygrid-event,
+.fc-timegrid-event {
+  border: none !important;
+  border-radius: 8px !important;
+  overflow: hidden;
+}
+
+/* Gold badge look for events */
+.fc .fc-event .fc-event-main {
+  background: var(--pide-gold-event);
+  color: #1a1a1a;
+  padding: 4px 6px;
+  border-radius: 8px;
+  white-space: normal;
+  /* allow wrapping */
+  line-height: 1.2;
+}
+
+/* Make timeGrid events readable with multiple lines */
+.fc-timegrid-event .fc-event-main {
+  white-space: normal;
+  padding: 6px 8px;
+}
+
+/* Event inner content */
+.ev-title {
+  font-weight: 700;
+}
+
+.ev-initiator {
+  font-size: .8rem;
+  opacity: .85;
+}
+
+.ev-actions {
+  display: inline-flex;
+  gap: 6px;
+  margin-top: 4px;
+}
+
+.mini-btn {
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  line-height: 1;
+  padding: 0;
+  font-size: 1rem;
+  color: #1a1a1a;
+}
+
+.mini-btn.edit {
+  color: #0d6efd;
+}
+
+.mini-btn.delete {
+  color: #dc3545;
+}
+
+/* Modal header with PIDE color */
+.modal-header {
+  background: var(--pide-green);
+  color: #fff;
+}
+
+.modal-title {
+  font-weight: 700;
+}
+
+.btn-save {
+  background: var(--pide-green);
+  border: none;
+}
+
+.btn-save:hover {
+  background: var(--pide-green-dark);
+}
+
+/* Footer text */
+.footer-text {
+  text-align: center;
+  color: #666;
+  margin: 18px 0;
+}
+
+/* Make FullCalendar header row light gray */
+.fc-col-header-cell {
+  background: #a8a8a8;
+  border-radius: 0.5rem 0.5rem 0 0;
+  padding: 0.5rem 1rem;
+}
+.fc .fc-button-primary:not(:disabled).fc-button-active, .fc .fc-button-primary:not(:disabled):active {
+    background-color: var(--pide-gold);
+    border-color: var(--pide-gold);
+    color: var(--fc-button-text-color);
+}
+.btn-outline-success
+ {
+    --bs-btn-color: var(--pide-green-dark);
+    --bs-btn-border-color: var(--pide-green-dark);
+    --bs-btn-hover-color: #fff;
+    --bs-btn-hover-bg: var(--pide-green-dark);
+    --bs-btn-hover-border-color: var(--pide-green-dark);
+    --bs-btn-focus-shadow-rgb: 25, 135, 84;
+    --bs-btn-active-color: #fff;
+    --bs-btn-active-bg: var(--pide-green-dark);
+    --bs-btn-active-border-color: var(--pide-green-dark);
+    --bs-btn-active-shadow: inset 0 3px 5px rgba(0, 0, 0, 0.125);
+    --bs-btn-disabled-color: var(--pide-green-dark);
+    --bs-btn-disabled-bg: transparent;
+    --bs-btn-disabled-border-color: var(--pide-green-dark);
+    --bs-gradient: none;
+}
