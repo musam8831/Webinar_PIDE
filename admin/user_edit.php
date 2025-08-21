@@ -1,3 +1,4 @@
+
 <?php
 require_once __DIR__ . '/../includes/db.php';
 require_once __DIR__ . '/../includes/auth.php';
@@ -23,7 +24,7 @@ if($_SERVER['REQUEST_METHOD']==='POST'){
 <form method="post" class="card card-body shadow-sm bg-white">
   <div class="mb-2"><label class="form-label">Name</label><input name="name" class="form-control" value="<?=htmlspecialchars($u['name'])?>" required></div>
   <div class="mb-2"><label class="form-label">Email</label><input name="email" type="email" class="form-control" value="<?=htmlspecialchars($u['email'])?>" required></div>
-  <div class="mb-2"><label class="form-label">New Password (leave blank to keep)</label><input name="password" type="password" class="form-control"></div>
+  <div class="mb-2"><label class="form-label">New Password (optional)</label><input name="password" type="password" class="form-control"></div>
   <div class="mb-2"><label class="form-label">Role</label><select name="role" class="form-select"><option value="user" <?= $u['role']=='user'?'selected':'' ?>>user</option><option value="admin" <?= $u['role']=='admin'?'selected':'' ?>>admin</option></select></div>
   <div><button class="btn btn-primary">Save</button> <a href="users.php" class="btn btn-secondary">Cancel</a></div>
 </form>

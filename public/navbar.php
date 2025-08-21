@@ -1,6 +1,5 @@
-<?php
-$user = $_SESSION['user'] ?? null;
-?>
+
+<?php $user = $_SESSION['user'] ?? null; ?>
 <nav class="navbar navbar-expand-lg bg-white border-bottom mb-3">
   <div class="container-fluid">
     <a class="navbar-brand" href="index.php">Webinar Booking</a>

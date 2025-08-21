@@ -1,26 +1,20 @@
-# Webinar Booking App
 
-Features
+# Webinar Booking App (with Google Login)
 - PHP + MySQL
-- User auth (login/logout)
-- Admin user CRUD (create, read, update, delete)
-- Webinar booking with conflict prevention (create & update both enforce no overlap)
-- Only initiator or admin can delete
-- Tooltip on hover (no blinking; uses Tippy.js)
-- Popup modal to add/edit webinar (not prompts)
-- **Admin-only Yearly Dashboard** (single screen with a switcher):
-  1) Heatmap-style grid
-  2) Classic mini-calendar (12 months)
-  3) Weekly Grid (Mon–Fri × 52 weeks)
+- Password login + Google OAuth2 (no composer needed)
+- Admin user CRUD
+- Webinar booking with conflict prevention
+- Admin-only Yearly Dashboard with 3 layouts (Heatmap, Mini-Calendars, Weekly Grid)
 
-## Setup
-1. Create a MySQL DB, update credentials in `includes/config.php`.
-2. Import `schema.sql` (or run `setup.php` once).
-3. Point web server to `public/` as document root.
-4. Login with default admin: `admin@example.com` / `Admin@123`
+## Quick Start
+1) Create a MySQL DB and import `webinar_app.sql`.
+2) Edit `includes/config.php` with your DB credentials and Google OAuth keys.
+3) Set your web server document root to `public/`.
+4) Visit `/public/login.php` and sign in:
+   - Email/password (default admin: admin@example.com / Admin@123)
+   - or Google
 
-## Routes
-- `/public/login.php`
-- `/public/index.php` — main calendar
-- `/admin/users.php` — user CRUD (admin only)
-- `/public/yearly_dashboard.php` — admin dashboard (3 views)
+## Google OAuth Setup
+- Create OAuth 2.0 Client ID at https://console.cloud.google.com/apis/credentials
+- Authorized redirect URI: `http://localhost/webinar_app/public/google_callback.php`
+- Put Client ID/Secret in `includes/config.php`.
