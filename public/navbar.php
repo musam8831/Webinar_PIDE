@@ -28,6 +28,8 @@ $user = $_SESSION['user'] ?? null;
           <a href="/Webinar_PIDE/public/yearly_dashboard.php" class="btn btn-outline-success btn-sm me-2">
             Yearly Dashboard
           </a>
+          <!-- NEW: Reports button -->
+          <a href="../admin/reports.php" class="btn btn-outline-success btn-sm me-2">Reports</a>
         <?php endif; ?>
 
         <a href="logout.php" class="btn btn-outline-danger btn-sm">Logout</a>
