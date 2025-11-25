@@ -4,7 +4,7 @@ $user = $_SESSION['user'] ?? null;
 <nav class="navbar navbar-expand-lg navbar-light bg-white border-bottom shadow-sm mb-3">
   <div class="container-fluid">
     <!-- Brand / Logo -->
-    <a class="navbar-brand d-flex align-items-center fw-bold text-success" href="/Webinar_PIDE/public/index.php">
+    <a class="navbar-brand d-flex align-items-center fw-bold text-success" href="../public/index.php">
       <img src="../assets/img/_PIDE LOGO White PNG.png" 
            alt="PIDE Logo" 
            width="200" 
@@ -25,7 +25,7 @@ $user = $_SESSION['user'] ?? null;
           <a href="../admin/users.php" class="btn btn-outline-success btn-sm me-2">
             User Management
           </a>
-          <a href="/Webinar_PIDE/public/yearly_dashboard.php" class="btn btn-outline-success btn-sm me-2">
+          <a href="../public/yearly_dashboard.php" class="btn btn-outline-success btn-sm me-2">
             Yearly Dashboard
           </a>
           <!-- NEW: Reports button -->
