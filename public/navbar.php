@@ -1,11 +1,13 @@
-<?php 
-$user = $_SESSION['user'] ?? null; 
+<?php
+$user = $_SESSION['user'] ?? null;
+$config = require __DIR__ . '/../includes/config.php';
+$base = rtrim($config['base_url'], '/');
 ?>
 <nav class="navbar navbar-expand-lg navbar-light bg-white border-bottom shadow-sm mb-3">
   <div class="container-fluid">
     <!-- Brand / Logo -->
-    <a class="navbar-brand d-flex align-items-center fw-bold text-success" href="../public/index.php">
-      <img src="../assets/img/_PIDE LOGO White PNG.png" 
+    <a class="navbar-brand d-flex align-items-center fw-bold text-success" href="<?= $base ?>/index.php">
+      <img src="<?= $base ?>/assets/img/_PIDE LOGO White PNG.png" 
            alt="PIDE Logo" 
            width="200" 
            height="110" 
@@ -22,19 +24,28 @@ $user = $_SESSION['user'] ?? null;
         </span>
 
         <?php if ($user['role'] === 'admin'): ?>
-          <a href="../admin/users.php" class="btn btn-outline-success btn-sm me-2">
+          <a href="<?= $base ?>/admin/users.php" class="btn btn-outline-success btn-sm me-2">
             User Management
           </a>
-          <a href="../public/yearly_dashboard.php" class="btn btn-outline-success btn-sm me-2">
+          <a href="<?= $base ?>/admin/categories.php" class="btn btn-outline-success btn-sm me-2">
+            Categories
+          </a>
+          <a href="<?= $base ?>/admin/pending_webinars.php" class="btn btn-outline-warning btn-sm me-2">
+            <i class="bi bi-exclamation-circle"></i> Pending Approval
+          </a>
+          <a href="<?= $base ?>/public/yearly_dashboard.php" class="btn btn-outline-success btn-sm me-2">
             Yearly Dashboard
           </a>
-          <!-- NEW: Reports button -->
-          <a href="../admin/reports.php" class="btn btn-outline-success btn-sm me-2">Reports</a>
+          <a href="<?= $base ?>/admin/reports.php" class="btn btn-outline-success btn-sm me-2">Reports</a>
         <?php endif; ?>
+        
+        <a href="<?= $base ?>/public/webinars_list.php" class="btn btn-outline-info btn-sm me-2">
+          <i class="bi bi-list-check"></i> My Webinars
+        </a>
 
-        <a href="logout.php" class="btn btn-outline-danger btn-sm">Logout</a>
+        <a href="<?= $base ?>/public/logout.php" class="btn btn-outline-danger btn-sm">Logout</a>
       <?php else: ?>
-        <a href="login.php" class="btn btn-success btn-sm">Login</a>
+        <a href="<?= $base ?>/public/login.php" class="btn btn-success btn-sm">Login</a>
       <?php endif; ?>
     </div>
   </div>

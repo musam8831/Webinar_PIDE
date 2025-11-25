@@ -12,7 +12,7 @@ function get_int(string $key): ?int {
 }
 
 // ---- Step 0: load distinct years from webinars (based on start_at) ----
-$yearsStmt = $pdo->query("SELECT DISTINCT YEAR(start_at) AS y FROM webinars ORDER BY y DESC");
+$yearsStmt = $pdo->query("SELECT DISTINCT YEAR(start_at) AS y FROM webinars WHERE is_approved=1 ORDER BY y DESC");
 $years = $yearsStmt->fetchAll(PDO::FETCH_COLUMN);
 if (!$years) {
     // If no data exists, still offer current year so UI works
@@ -89,6 +89,7 @@ $perUserStmt = $pdo->prepare("
   FROM users u
   LEFT JOIN webinars w
     ON w.initiated_by = u.id
+   AND w.is_approved = 1
    AND w.start_at >= :startUtc
    AND w.start_at <= :endUtc
   GROUP BY u.id, u.name
@@ -101,7 +102,7 @@ $perUser = $perUserStmt->fetchAll(PDO::FETCH_ASSOC);
 $trendStmt = $pdo->prepare("
   SELECT DATE_FORMAT(w.start_at, '%Y-%m') AS ym, COUNT(*) AS total
   FROM webinars w
-  WHERE w.start_at >= :startUtc AND w.start_at <= :endUtc
+  WHERE w.is_approved = 1 AND w.start_at >= :startUtc AND w.start_at <= :endUtc
   GROUP BY ym
   ORDER BY ym
 ");

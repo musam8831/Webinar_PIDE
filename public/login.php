@@ -1,8 +1,11 @@
 
 <?php
+$config = require __DIR__ . '/../includes/config.php';
+$base = rtrim($config['base_url'], '/');
+
 require_once __DIR__ . '/../includes/db.php';
 session_start();
-if (isset($_SESSION['user'])) { header('Location: index.php'); exit; }
+if (isset($_SESSION['user'])) { header('Location: ' . $base . '/index.php'); exit; }
 $error = '';
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   $email = trim($_POST['email'] ?? '');
@@ -13,7 +16,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $user = $stmt->fetch();
     if ($user && !empty($user['password_hash']) && password_verify($pass, $user['password_hash'])) {
       $_SESSION['user'] = ['id'=>$user['id'],'name'=>$user['name'],'email'=>$user['email'],'role'=>$user['role']];
-      header('Location: index.php'); exit;
+      header('Location: ' . $base . '/index.php'); exit;
     } else { $error = 'Invalid credentials'; }
   } else { $error = 'Email and password required'; }
 }
@@ -67,10 +70,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       <button type="submit" class="btn btn-primary w-100">Login</button>
     </form>
     <div class="mt-3">
-      <!-- <a href="google_login.php" title="Log in with Google" class="p-12-24 b-radius-8 gray-border social" data-qa="google-login-button">
-        <img src="https://auth.hostinger.com/assets/images/oauth/google.svg" alt="Google">
-      </a> -->
-      <a class="btn google-btn" href="google_login.php">
+      <a class="btn google-btn" href="<?= $base ?>/public/google_login.php">
         <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="" style="width: 50px; height: 50px;">
         <span> Sign in with Google</span>
       </a>
