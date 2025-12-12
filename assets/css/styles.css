@@ -24,3 +24,18 @@ body { background: #f6f7fb; }
 .sticky-tools { position: sticky; top:0; z-index: 5; background:#fff; padding:8px 0; }
 .google-btn { display:inline-flex; align-items:center; gap:8px; border:1px solid #dfe1e5; border-radius:6px; padding:8px 12px; background:#fff; text-decoration:none; }
 .google-btn img { width:18px; height:18px; }
+
+/* Notification styles */
+.notification-toast { position: fixed; top: 20px; right: 20px; background: #fff; border-radius: 8px; padding: 16px 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); z-index: 9999; animation: slideIn 0.3s ease-out; min-width: 320px; }
+.notification-toast.success { border-left: 4px solid #118C3C; }
+.notification-toast.success .notification-icon { color: #118C3C; }
+.notification-toast.error { border-left: 4px solid #dc3545; }
+.notification-toast.error .notification-icon { color: #dc3545; }
+.notification-toast.info { border-left: 4px solid #0d6efd; }
+.notification-toast.info .notification-icon { color: #0d6efd; }
+.notification-icon { font-size: 20px; display: inline-block; margin-right: 10px; vertical-align: middle; }
+.notification-message { display: inline-block; vertical-align: middle; }
+.notification-close { float: right; cursor: pointer; font-size: 20px; opacity: 0.6; }
+.notification-close:hover { opacity: 1; }
+@keyframes slideIn { from { transform: translateX(400px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+@keyframes slideOut { from { transform: translateX(0); opacity: 1; } to { transform: translateX(400px); opacity: 0; } }

@@ -51,6 +51,39 @@ $categories = $categoriesStmt->fetchAll();
   </div>
 </main>
 
+<!-- Info Dialog - Shown after creating webinar -->
+<div class="modal fade" id="infoModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header bg-info text-white">
+        <h5 class="modal-title"><i class="bi bi-info-circle-fill"></i> Webinar Submitted</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <div class="alert alert-info" role="alert">
+          <i class="bi bi-check-circle"></i> <strong>Success!</strong>
+        </div>
+        <p><strong>Your webinar has been submitted for approval.</strong></p>
+        <p class="text-muted">The administrators will review your submission and approve or reject it based on the content quality and schedule availability.</p>
+        <hr>
+        <div class="info-details">
+          <p><strong>What happens next?</strong></p>
+          <ul>
+            <li>Your webinar will appear with an <span style="background: #ff8c00; color: white; padding: 2px 6px; border-radius: 3px; font-size: 12px;">⏳ Pending</span> status on your calendar</li>
+            <li>Only you and administrators can see pending webinars</li>
+            <li>Once approved, it will turn <span style="background: #118C3C; color: white; padding: 2px 6px; border-radius: 3px; font-size: 12px;">✓ Approved</span> (green)</li>
+            <li>You can edit or delete pending webinars anytime</li>
+            <li>You cannot edit approved webinars - only administrators can</li>
+          </ul>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-info px-4" data-bs-dismiss="modal" type="button"><i class="bi bi-check"></i> Understood</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- Add/Edit Modal -->
 <div class="modal fade" id="eventModal" tabindex="-1" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered">
@@ -111,10 +144,39 @@ $categories = $categoriesStmt->fetchAll();
 <script>
 const currentUser = <?= json_encode($user, JSON_UNESCAPED_UNICODE) ?>;
 
+// Notification function
+function showNotification(message, type = 'success', duration = 4000) {
+  const toast = document.createElement('div');
+  toast.className = `notification-toast ${type}`;
+  
+  const iconMap = {
+    'success': 'bi-check-circle-fill',
+    'error': 'bi-x-circle-fill',
+    'info': 'bi-info-circle-fill'
+  };
+  
+  toast.innerHTML = `
+    <i class="bi ${iconMap[type]} notification-icon"></i>
+    <span class="notification-message">${message}</span>
+    <span class="notification-close" onclick="this.parentElement.style.animation='slideOut 0.3s ease-out'; setTimeout(() => this.parentElement.remove(), 300);">&times;</span>
+  `;
+  
+  document.body.appendChild(toast);
+  
+  if (duration > 0) {
+    setTimeout(() => {
+      toast.style.animation = 'slideOut 0.3s ease-out';
+      setTimeout(() => toast.remove(), 300);
+    }, duration);
+  }
+}
+
 document.addEventListener('DOMContentLoaded', function(){
   const calendarEl = document.getElementById('calendar');
   const modalEl = document.getElementById('eventModal');
   const modal = new bootstrap.Modal(modalEl);
+  const infoModalEl = document.getElementById('infoModal');
+  const infoModal = new bootstrap.Modal(infoModalEl);
   const form = document.getElementById('eventForm');
 
   const calendar = new FullCalendar.Calendar(calendarEl, {
@@ -152,6 +214,7 @@ document.addEventListener('DOMContentLoaded', function(){
       const titleRaw = arg.event.title || '';
       const initiator = arg.event.extendedProps?.initiator_name || arg.event.extendedProps?.initiator || '';
       const shortTitle = titleRaw.length > 50 ? titleRaw.substring(0,50) + '…' : titleRaw;
+      const isPending = arg.event.extendedProps?.is_pending || false;
 
       const titleEl = document.createElement('div');
       titleEl.className = 'ev-title';
@@ -160,6 +223,12 @@ document.addEventListener('DOMContentLoaded', function(){
       const initEl = document.createElement('div');
       initEl.className = 'ev-initiator';
       initEl.textContent = initiator ? ('👤 ' + initiator) : '';
+
+      const statusEl = document.createElement('div');
+      statusEl.className = 'ev-status';
+      if (isPending) {
+        statusEl.innerHTML = '<span style="font-size: 10px; background: #ff8c00; color: white; padding: 2px 6px; border-radius: 3px;">⏳ Pending</span>';
+      }
 
       const actions = document.createElement('div');
       actions.className = 'ev-actions';
@@ -189,6 +258,7 @@ document.addEventListener('DOMContentLoaded', function(){
       const wrap = document.createElement('div');
       wrap.appendChild(titleEl);
       if (initiator) wrap.appendChild(initEl);
+      if (isPending) wrap.appendChild(statusEl);
       if (canEdit || canDelete) wrap.appendChild(actions);
 
       return { domNodes: [wrap] };
@@ -200,9 +270,23 @@ document.addEventListener('DOMContentLoaded', function(){
       const end   = info.event.end   ? new Date(info.event.end)   : null;
       const initiator = info.event.extendedProps?.initiator_name || info.event.extendedProps?.initiator || '';
       const category = info.event.extendedProps?.category_title || '';
+      const isApproved = info.event.extendedProps?.is_approved || false;
+      const isRejected = info.event.extendedProps?.is_rejected || false;
+      const isPending = info.event.extendedProps?.is_pending || false;
+      
+      let statusBadge = '';
+      if (isApproved) {
+        statusBadge = '<span style="background: #118C3C; color: white; padding: 2px 6px; border-radius: 3px; font-size: 12px;">✓ Approved</span>';
+      } else if (isRejected) {
+        statusBadge = '<span style="background: #dc3545; color: white; padding: 2px 6px; border-radius: 3px; font-size: 12px;">✗ Rejected</span>';
+      } else if (isPending) {
+        statusBadge = '<span style="background: #ff8c00; color: white; padding: 2px 6px; border-radius: 3px; font-size: 12px;">⏳ Pending Approval</span>';
+      }
+      
       const body = `
         <div style="min-width:220px">
           <div><strong>${info.event.title}</strong></div>
+          <div>${statusBadge}</div>
           <div>${start ? start.toLocaleString() : ''} ${end ? (' - ' + end.toLocaleString()) : ''}</div>
           ${category ? ('<div><i class="bi bi-tag"></i> ' + category + '</div>') : ''}
           ${initiator ? ('<div>👤 ' + initiator + '</div>') : ''}
@@ -255,7 +339,10 @@ document.addEventListener('DOMContentLoaded', function(){
     .then(r=>r.json())
     .then(res=>{
       if(res.error) alert(res.error);
-      else calendar.refetchEvents();
+      else {
+        showNotification('Webinar deleted successfully.', 'success');
+        calendar.refetchEvents();
+      }
     })
     .catch(()=>alert('Failed to delete.'));
   }
@@ -273,6 +360,7 @@ document.addEventListener('DOMContentLoaded', function(){
     if (!payload.category_id) { document.getElementById('formError').innerText = 'Category is required.'; return; }
 
     const url = payload.id ? 'public/update_event.php' : 'public/save_event.php';
+    const isNewEvent = !payload.id;
     fetch(url, {
       method:'POST',
       headers:{'Content-Type':'application/json'},
@@ -281,14 +369,23 @@ document.addEventListener('DOMContentLoaded', function(){
     .then(r=>r.json())
     .then(res=>{
       if (res.error) {
-        document.getElementById('formError').innerText = res.error;
+        showNotification(res.error, 'error');
       } else {
         modal.hide();
         calendar.refetchEvents();
-        alert(payload.id ? 'Webinar updated successfully.' : 'Webinar submitted for approval.');
+        if (isNewEvent) {
+          // Show info dialog for new webinars
+          showNotification('Webinar submitted for approval!', 'success', 3000);
+          setTimeout(() => {
+            infoModal.show();
+          }, 500);
+        } else {
+          // Just show notification for updates
+          showNotification('Webinar updated successfully.', 'success', 5000);
+        }
       }
     })
-    .catch(()=>{ document.getElementById('formError').innerText = 'Request failed. Try again.'; });
+    .catch(()=>{ showNotification('Request failed. Please try again.', 'error'); });
   });
 
   calendar.render();

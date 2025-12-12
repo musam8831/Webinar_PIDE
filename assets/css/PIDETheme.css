@@ -125,6 +125,11 @@ body {
   opacity: .85;
 }
 
+.ev-status {
+  font-size: .75rem;
+  margin-top: 3px;
+}
+
 .ev-actions {
   display: inline-flex;
   gap: 6px;

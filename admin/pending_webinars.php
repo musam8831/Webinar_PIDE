@@ -29,9 +29,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             try {
                 $stmt = $pdo->prepare('UPDATE webinars SET rejection_reason=? WHERE id=?');
                 $stmt->execute([$reason, $webinar_id]);
-                // Delete rejected webinar
-                $pdo->prepare('DELETE FROM webinars WHERE id=?')->execute([$webinar_id]);
-                $message = 'Webinar rejected and deleted.';
+                $message = 'Webinar rejected. Rejection reason has been saved.';
             } catch (Exception $e) {
                 $error = 'Error rejecting webinar: ' . $e->getMessage();
             }
@@ -39,8 +37,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
-// Fetch pending webinars
-$stmt = $pdo->query('SELECT w.id, w.title, w.start_at, w.end_at, w.category_id, c.title AS category_title, w.initiated_by, u.name AS initiator_name, u.email AS initiator_email, w.created_at FROM webinars w JOIN users u ON u.id=w.initiated_by LEFT JOIN categories c ON c.id=w.category_id WHERE w.is_approved=0 ORDER BY w.created_at DESC');
+// Fetch pending webinars (is_approved=0 AND rejection_reason IS NULL/empty)
+$stmt = $pdo->query('SELECT w.id, w.title, w.start_at, w.end_at, w.category_id, c.title AS category_title, w.initiated_by, u.name AS initiator_name, u.email AS initiator_email, w.created_at FROM webinars w JOIN users u ON u.id=w.initiated_by LEFT JOIN categories c ON c.id=w.category_id WHERE w.is_approved=0 AND (w.rejection_reason IS NULL OR w.rejection_reason = \'\') ORDER BY w.created_at DESC');
 $pending_webinars = $stmt->fetchAll();
 ?>
 <!doctype html>

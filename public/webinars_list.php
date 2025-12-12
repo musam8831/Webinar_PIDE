@@ -33,7 +33,8 @@ if ($filter_status === 'approved') {
 } elseif ($filter_status === 'pending') {
   // Pending = not approved and not rejected
   $where_parts[] = '(w.is_approved=0 AND (w.rejection_reason IS NULL OR w.rejection_reason = ""))';
-} // 'all' => no extra clause
+} 
+// 'all' => no extra status clause
 
 // User filter (admin only)
 if ($is_admin && $filter_user > 0) {
@@ -94,15 +95,15 @@ if ($filter_search) {
     $params[] = '%' . $filter_search . '%';
 }
 
-$where_clause = implode(' AND ', $where_parts);
+$where_clause = count($where_parts) > 0 ? 'WHERE ' . implode(' AND ', $where_parts) : '';
 
 // Fetch webinars
-$query = "SELECT w.id, w.title, w.start_at, w.end_at, w.category_id, c.title AS category_title,
+$query = "SELECT w.id, w.title, w.start_at, w.end_at, w.category_id, w.is_approved, w.rejection_reason, c.title AS category_title,
                  w.initiated_by, u.name AS initiator_name, u.email AS initiator_email, w.created_at
           FROM webinars w
           JOIN users u ON u.id=w.initiated_by
           LEFT JOIN categories c ON c.id=w.category_id
-          WHERE $where_clause
+          $where_clause
           ORDER BY w.start_at DESC";
 
 $stmt = $pdo->prepare($query);
@@ -133,11 +134,18 @@ $all_categories = $stmt->fetchAll();
   <style>
     .list-shell { max-width: 1200px; margin: 20px auto; }
     .filter-section { background:#f8f9fa; padding:15px; border-radius:8px; margin-bottom:20px; }
-    .webinar-row { background:#fff; border-radius:8px; box-shadow:0 2px 8px rgba(0,0,0,.1); margin-bottom:12px; padding:15px; }
+    .webinar-row { background:#fff; border-radius:8px; box-shadow:0 2px 8px rgba(0,0,0,.1); margin-bottom:12px; padding:15px; border-left: 4px solid #ccc; }
+    .webinar-row.approved { border-left-color: #118C3C; background-color: #f0f8f5; }
+    .webinar-row.pending { border-left-color: #ff8c00; background-color: #fff8f0; }
+    .webinar-row.rejected { border-left-color: #dc3545; background-color: #fff5f5; }
     .webinar-row:hover { box-shadow:0 4px 12px rgba(0,0,0,.15); }
     .row-title { font-size:16px; font-weight:600; color:var(--pide-green); margin-bottom:8px; }
     .row-meta { font-size:13px; color:#666; margin:3px 0; }
     .row-actions { display:flex; gap:8px; margin-top:10px; }
+    .status-badge { display: inline-block; padding: 4px 10px; border-radius: 4px; font-size: 12px; font-weight: 600; margin-left: 8px; }
+    .status-badge.approved { background-color: #118C3C; color: white; }
+    .status-badge.pending { background-color: #ff8c00; color: white; }
+    .status-badge.rejected { background-color: #dc3545; color: white; }
   </style>
 </head>
 <body>
@@ -250,8 +258,20 @@ $all_categories = $stmt->fetchAll();
     </div>
   <?php else: ?>
     <?php foreach ($webinars as $webinar): ?>
-      <div class="webinar-row">
-        <div class="row-title"><?= htmlspecialchars($webinar['title']) ?></div>
+      <?php
+        // Determine status
+        $is_approved = (int)$webinar['is_approved'] === 1;
+        $is_rejected = !empty($webinar['rejection_reason']) && $webinar['rejection_reason'] !== '';
+        $is_pending = !$is_approved && !$is_rejected;
+        
+        $status_class = $is_approved ? 'approved' : ($is_rejected ? 'rejected' : 'pending');
+        $status_text = $is_approved ? '✓ Approved' : ($is_rejected ? '✗ Rejected' : '⏳ Pending');
+      ?>
+      <div class="webinar-row <?= $status_class ?>">
+        <div class="row-title">
+          <?= htmlspecialchars($webinar['title']) ?>
+          <span class="status-badge <?= $status_class ?>"><?= $status_text ?></span>
+        </div>
         <div class="row-meta">
           <i class="bi bi-calendar-event"></i> <?= date('M d, Y H:i', strtotime($webinar['start_at'])) ?> - <?= date('H:i', strtotime($webinar['end_at'])) ?>
         </div>
@@ -261,6 +281,11 @@ $all_categories = $stmt->fetchAll();
         <?php if ($webinar['category_title']): ?>
           <div class="row-meta">
             <i class="bi bi-tag"></i> <span class="badge bg-info"><?= htmlspecialchars($webinar['category_title']) ?></span>
+          </div>
+        <?php endif; ?>
+        <?php if ($is_rejected && $webinar['rejection_reason']): ?>
+          <div class="row-meta" style="color: #dc3545; font-style: italic;">
+            <i class="bi bi-exclamation-circle"></i> Reason: <?= htmlspecialchars($webinar['rejection_reason']) ?>
           </div>
         <?php endif; ?>
       </div>
