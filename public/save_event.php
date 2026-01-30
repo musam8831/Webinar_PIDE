@@ -6,6 +6,7 @@ require_login();
 $payload = json_decode(file_get_contents('php://input'), true) ?? [];
 $title = trim($payload['title'] ?? ''); 
 $category_id = (int)($payload['category_id'] ?? 0);
+$description = $payload['description'] ?? null;
 $start = $payload['start'] ?? ''; 
 $end = $payload['end'] ?? '';
 
@@ -43,7 +44,7 @@ if ((int)$ov->fetchColumn()>0){
 }
 
 // Insert with is_approved=0 (unapproved by default)
-$ins=$pdo->prepare('INSERT INTO webinars (title, category_id, start_at, end_at, initiated_by, is_approved) VALUES (?,?,?,?,?,0)');
-$ins->execute([$title, $category_id, $start, $end, $_SESSION['user']['id']]);
+$ins=$pdo->prepare('INSERT INTO webinars (title, description, category_id, start_at, end_at, initiated_by, is_approved) VALUES (?,?,?,?,?,?,0)');
+$ins->execute([$title, $description, $category_id, $start, $end, $_SESSION['user']['id']]);
 echo json_encode(['ok'=>true,'id'=>$pdo->lastInsertId()]);
 

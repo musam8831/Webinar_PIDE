@@ -61,4 +61,4 @@ if (!$user) {
 }
 
 $_SESSION['user'] = $user;
-header('Location: index.php'); exit;
+header('Location: ' . $base . '/index.php'); exit;

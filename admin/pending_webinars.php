@@ -38,7 +38,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 
 // Fetch pending webinars (is_approved=0 AND rejection_reason IS NULL/empty)
-$stmt = $pdo->query('SELECT w.id, w.title, w.start_at, w.end_at, w.category_id, c.title AS category_title, w.initiated_by, u.name AS initiator_name, u.email AS initiator_email, w.created_at FROM webinars w JOIN users u ON u.id=w.initiated_by LEFT JOIN categories c ON c.id=w.category_id WHERE w.is_approved=0 AND (w.rejection_reason IS NULL OR w.rejection_reason = \'\') ORDER BY w.created_at DESC');
+$stmt = $pdo->query('SELECT w.id, w.title, w.description, w.start_at, w.end_at, w.category_id, c.title AS category_title, w.initiated_by, u.name AS initiator_name, u.email AS initiator_email, w.created_at FROM webinars w JOIN users u ON u.id=w.initiated_by LEFT JOIN categories c ON c.id=w.category_id WHERE w.is_approved=0 AND (w.rejection_reason IS NULL OR w.rejection_reason = \'\') ORDER BY w.created_at DESC');
 $pending_webinars = $stmt->fetchAll();
 ?>
 <!doctype html>
@@ -98,6 +98,9 @@ $pending_webinars = $stmt->fetchAll();
             </div>
             <div class="webinar-meta">
               <i class="bi bi-calendar-event"></i> <?= date('M d, Y H:i', strtotime($webinar['start_at'])) ?> - <?= date('H:i', strtotime($webinar['end_at'])) ?>
+            </div>
+            <div class="webinar-meta">
+              <a href="#" class="description-link" data-description='<?= htmlspecialchars($webinar['description'] ?? '', ENT_QUOTES) ?>'>Description</a>
             </div>
             <?php if ($webinar['category_title']): ?>
               <div class="webinar-meta">
@@ -159,6 +162,23 @@ $pending_webinars = $stmt->fetchAll();
   </div>
 </div>
 
+    <!-- Description Modal -->
+    <div class="modal fade" id="descriptionModal" tabindex="-1" aria-hidden="true">
+      <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">Webinar Description</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+          </div>
+          <div class="modal-body" id="descriptionModalBody">
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script>
 function showRejectModal(id, title) {
@@ -167,6 +187,17 @@ function showRejectModal(id, title) {
   const modal = new bootstrap.Modal(document.getElementById('rejectModal'));
   modal.show();
 }
+document.addEventListener('DOMContentLoaded', function(){
+  document.querySelectorAll('.description-link').forEach(el=>{
+    el.addEventListener('click', function(e){
+      e.preventDefault();
+      const html = this.dataset.description || '';
+      document.getElementById('descriptionModalBody').innerHTML = html || '<div class="text-muted">No description provided.</div>';
+      const m = new bootstrap.Modal(document.getElementById('descriptionModal'));
+      m.show();
+    });
+  });
+});
 </script>
 </body>
 </html>

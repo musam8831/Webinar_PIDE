@@ -30,8 +30,8 @@ $base = rtrim($config['base_url'], '/');
           <a href="<?= $base ?>/admin/categories.php" class="btn btn-outline-success btn-sm me-2">
             Categories
           </a>
-          <a href="<?= $base ?>/admin/pending_webinars.php" class="btn btn-outline-warning btn-sm me-2">
-            <i class="bi bi-exclamation-circle"></i> Pending Approval
+          <a href="<?= $base ?>/admin/pending_webinars.php" class="btn btn-outline-success btn-interactive btn-sm me-2" title="View pending webinars for approval">
+            <i class="bi bi-exclamation-circle-fill me-1"></i> Pending Approval
           </a>
           <a href="<?= $base ?>/public/yearly_dashboard.php" class="btn btn-outline-success btn-sm me-2">
             Yearly Dashboard
@@ -39,11 +39,13 @@ $base = rtrim($config['base_url'], '/');
           <a href="<?= $base ?>/admin/reports.php" class="btn btn-outline-success btn-sm me-2">Reports</a>
         <?php endif; ?>
         
-        <a href="<?= $base ?>/public/webinars_list.php" class="btn btn-outline-info btn-sm me-2">
-          <i class="bi bi-list-check"></i> My Webinars
+        <a href="<?= $base ?>/public/webinars_list.php" class="btn btn-outline-success btn-interactive btn-sm me-2" title="View your webinars">
+          <i class="bi bi-list-check me-1"></i> My Webinars
         </a>
 
-        <a href="<?= $base ?>/public/logout.php" class="btn btn-outline-danger btn-sm">Logout</a>
+        <a href="<?= $base ?>/public/logout.php" class="btn btn-outline-success btn-interactive btn-sm" title="Log out of your account">
+          <i class="bi bi-box-arrow-right me-1"></i> Logout
+        </a>
       <?php else: ?>
         <a href="<?= $base ?>/public/login.php" class="btn btn-success btn-sm">Login</a>
       <?php endif; ?>

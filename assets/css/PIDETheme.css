@@ -173,6 +173,32 @@ body {
   background: var(--pide-green-dark);
 }
 
+/* Interactive buttons used in navbar (hover, focus, active feedback) */
+.btn-interactive {
+  transition: transform 120ms ease, box-shadow 120ms ease, filter 120ms ease;
+  will-change: transform, box-shadow;
+}
+.btn-interactive:hover {
+  transform: translateY(-3px) scale(1.02);
+  box-shadow: 0 8px 20px rgba(17,140,60,0.12);
+  filter: brightness(1.02);
+}
+.btn-interactive:active {
+  transform: translateY(0) scale(0.995);
+  box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+}
+.btn-interactive:focus {
+  outline: none;
+  box-shadow: 0 0 0 0.2rem rgba(17,140,60,0.18);
+}
+
+/* Subtle attention animation for pending state (used by Pending Approval button) */
+.btn-warning i {
+  transition: transform 220ms ease;
+}
+.btn-warning:hover i { transform: rotate(-8deg) scale(1.05); }
+
+
 /* Footer text */
 .footer-text {
   text-align: center;
@@ -207,4 +233,61 @@ body {
     --bs-btn-disabled-color: var(--pide-gray-btn);
     --bs-btn-disabled-bg: transparent;
     --bs-btn-disabled-border-color: var(--pide-gray-btn);
+}
+
+/* Custom compact time-picker (improves UX over native select) */
+.time-picker {
+  border: 1px solid #e6e6e6;
+  border-radius: 6px;
+  width: 110px;
+  max-height: 180px;
+  overflow-y: auto;
+  padding: 6px 4px;
+  background: #fff;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+}
+.time-picker .tp-item {
+  padding: 6px 8px;
+  border-radius: 4px;
+  cursor: pointer;
+  color: #1a1a1a;
+  font-size: .95rem;
+}
+.time-picker .tp-item + .tp-item { margin-top: 4px; }
+.time-picker .tp-item:hover { background: #f1f5f9; }
+.time-picker .tp-item.selected { background: var(--pide-green); color: #fff; font-weight: 600; }
+.time-picker .tp-item.disabled { color: #9a9a9a; cursor: not-allowed; background: transparent; }
+
+/* smaller gap for the date+time controls on modal */
+.modal-body .d-flex.gap-2 { align-items: center; }
+.modal-body .time-picker { margin-left: 6px; }
+
+/* Time-panel used with datetime-local inputs */
+.time-panel {
+  position: absolute;
+  top: 42px;
+  right: 0;
+  width: 140px;
+  max-height: 220px;
+  overflow-y: auto;
+  background: #fff;
+  border: 1px solid #e6e6e6;
+  border-radius: 8px;
+  padding: 6px;
+  box-shadow: 0 6px 20px rgba(0,0,0,0.08);
+  z-index: 1055;
+}
+.time-panel .tp-item { padding: 6px 8px; border-radius: 4px; cursor: pointer; }
+.time-panel .tp-item + .tp-item { margin-top: 4px; }
+.time-panel .tp-item:hover { background:#f1f5f9; }
+.time-panel .tp-item.disabled { color:#9a9a9a; cursor:not-allowed; }
+.time-btn { height: calc(2.5rem - 2px); }
+
+/* Date input compact style and selected time badge */
+.date-input { width: 120px; padding: .45rem .5rem; }
+.selected-time { margin-left: 6px; padding: .35rem .5rem; font-weight: 600; }
+
+@media (max-width: 576px) {
+  .date-input { width: 110px; }
+  .time-panel { right: -6px; }
 }

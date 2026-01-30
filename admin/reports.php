@@ -12,23 +12,76 @@ function get_int(string $key): ?int {
 }
 
 // ---- Step 0: load distinct years from webinars (based on start_at) ----
-$yearsStmt = $pdo->query("SELECT DISTINCT YEAR(start_at) AS y FROM webinars WHERE is_approved=1 ORDER BY y DESC");
-$years = $yearsStmt->fetchAll(PDO::FETCH_COLUMN);
-if (!$years) {
-    // If no data exists, still offer current year so UI works
-    $years = [ (int)date('Y') ];
+// helper: compute start/end UTC strings based on request parameters
+function computeRangeFromRequest(array $g): ?array {
+    // expected return: ['startUtc' => 'YYYY-MM-DD HH:MM:SS', 'endUtc' => 'YYYY-MM-DD HH:MM:SS', 'label' => '...']
+    $period = $g['period'] ?? null;
+    if (!$period) return null;
+    $now = new DateTime('now', new DateTimeZone(date_default_timezone_get()));
+
+    try {
+        switch ($period) {
+            case 'today':
+                $start = (clone $now)->setTime(0,0,0);
+                $end   = (clone $now)->setTime(23,59,59);
+                return ['startUtc'=>$start->format('Y-m-d H:i:s'), 'endUtc'=>$end->format('Y-m-d H:i:s'), 'label'=>'Today'];
+
+            case 'week':
+                // expects week_date=YYYY-MM-DD representing any date in the desired week
+                if (empty($g['week_date'])) return null;
+                $d = new DateTime($g['week_date']);
+                // ISO week: Monday (1) .. Sunday (7)
+                $wd = (int)$d->format('N');
+                $start = (clone $d)->modify('-'.($wd-1).' days')->setTime(0,0,0);
+                $end = (clone $start)->modify('+6 days')->setTime(23,59,59);
+                return ['startUtc'=>$start->format('Y-m-d H:i:s'), 'endUtc'=>$end->format('Y-m-d H:i:s'), 'label'=>'Week of '.$start->format('Y-m-d')];
+
+            case 'month':
+                // expects month in YYYY-MM (input type=month)
+                if (empty($g['month'])) return null;
+                $dt = new DateTime($g['month'].'-01');
+                $start = $dt->setTime(0,0,0);
+                $end = (clone $dt)->modify('last day of this month')->setTime(23,59,59);
+                return ['startUtc'=>$start->format('Y-m-d H:i:s'), 'endUtc'=>$end->format('Y-m-d H:i:s'), 'label'=>$dt->format('F Y')];
+
+            case 'year':
+                if (empty($g['year'])) return null;
+                $y = (int)$g['year'];
+                if ($y < 1970 || $y > 3000) return null;
+                $start = new DateTime(sprintf('%04d-01-01 00:00:00',$y));
+                $end   = new DateTime(sprintf('%04d-12-31 23:59:59',$y));
+                return ['startUtc'=>$start->format('Y-m-d H:i:s'), 'endUtc'=>$end->format('Y-m-d H:i:s'), 'label'=>$y];
+
+            case 'custom':
+                if (empty($g['start_date']) || empty($g['end_date'])) return null;
+                $s = new DateTime($g['start_date']);
+                $e = new DateTime($g['end_date']);
+                if ($s > $e) return null;
+                $s->setTime(0,0,0);
+                $e->setTime(23,59,59);
+                return ['startUtc'=>$s->format('Y-m-d H:i:s'), 'endUtc'=>$e->format('Y-m-d H:i:s'), 'label'=>'Custom '.$s->format('Y-m-d').' – '.$e->format('Y-m-d')];
+
+            default:
+                return null;
+        }
+    } catch (Exception $ex) {
+        return null;
+    }
 }
 
-$selectedYear = get_int('year');
-
-// ---- If no year selected, show selection UI ----
-if (!$selectedYear) {
+// If no period param or invalid, show selection UI
+$range = computeRangeFromRequest($_GET);
+if (!$range) {
+    // load distinct years for select options
+    $yearsStmt = $pdo->query("SELECT DISTINCT YEAR(start_at) AS y FROM webinars WHERE is_approved=1 ORDER BY y DESC");
+    $years = $yearsStmt->fetchAll(PDO::FETCH_COLUMN);
+    if (!$years) { $years = [ (int)date('Y') ]; }
     ?>
     <!doctype html>
     <html lang="en">
     <head>
       <meta charset="utf-8">
-      <title>PIDE Webinar Portal — Reports (Select Year)</title>
+      <title>PIDE Webinar Portal — Reports (Select Range)</title>
       <meta name="viewport" content="width=device-width, initial-scale=1">
 
       <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -37,10 +90,11 @@ if (!$selectedYear) {
       <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
 
       <style>
-        .reports-shell { max-width: 800px; margin: 28px auto; }
+        .reports-shell { max-width: 900px; margin: 28px auto; }
         .card-sel { background:#fff; border-radius:12px; box-shadow:0 6px 18px rgba(0,0,0,.12); overflow:hidden; }
         .card-sel .card-header { background:#fff; border:0; padding:16px 20px; }
         .report-title { margin:0; font-weight:700; color: var(--pide-green); display:flex; align-items:center; gap:.5rem; }
+        .period-options .form-check { margin-right: 12px; }
       </style>
     </head>
     <body>
@@ -49,20 +103,66 @@ if (!$selectedYear) {
       <main class="reports-shell">
         <div class="card card-sel">
           <div class="card-header">
-            <h5 class="report-title"><i class="bi bi-funnel"></i> Select Year for Reports</h5>
+            <h5 class="report-title"><i class="bi bi-funnel"></i> Select Range for Reports</h5>
           </div>
           <div class="card-body">
-            <form method="get" action="reports.php" class="row g-3">
+            <form method="get" action="reports.php" class="row g-3" id="rangeForm">
               <div class="col-12">
+                <label class="form-label">Quick Range</label>
+                <div class="d-flex period-options">
+                  <div class="form-check">
+                    <input class="form-check-input" type="radio" name="period" id="p_today" value="today" checked>
+                    <label class="form-check-label" for="p_today">Today</label>
+                  </div>
+                  <div class="form-check">
+                    <input class="form-check-input" type="radio" name="period" id="p_week" value="week">
+                    <label class="form-check-label" for="p_week">Weekly</label>
+                  </div>
+                  <div class="form-check">
+                    <input class="form-check-input" type="radio" name="period" id="p_month" value="month">
+                    <label class="form-check-label" for="p_month">Monthly</label>
+                  </div>
+                  <div class="form-check">
+                    <input class="form-check-input" type="radio" name="period" id="p_year" value="year">
+                    <label class="form-check-label" for="p_year">Year</label>
+                  </div>
+                  <div class="form-check">
+                    <input class="form-check-input" type="radio" name="period" id="p_custom" value="custom">
+                    <label class="form-check-label" for="p_custom">Custom</label>
+                  </div>
+                </div>
+              </div>
+
+              <div class="col-md-4 mt-2" id="field_week" style="display:none;">
+                <label class="form-label">Week (select any date within week)</label>
+                <input type="date" name="week_date" class="form-control">
+              </div>
+
+              <div class="col-md-4 mt-2" id="field_month" style="display:none;">
+                <label class="form-label">Month</label>
+                <input type="month" name="month" class="form-control">
+              </div>
+
+              <div class="col-md-4 mt-2" id="field_year" style="display:none;">
                 <label class="form-label">Year</label>
-                <select name="year" class="form-select" required>
+                <select name="year" class="form-select">
                   <option value="">— Choose year —</option>
                   <?php foreach ($years as $y): ?>
                     <option value="<?= (int)$y ?>"><?= (int)$y ?></option>
                   <?php endforeach; ?>
                 </select>
               </div>
-              <div class="col-12">
+
+              <div class="col-md-4 mt-2" id="field_custom" style="display:none;">
+                <label class="form-label">Start Date</label>
+                <input type="date" name="start_date" class="form-control">
+              </div>
+              <div class="col-md-4 mt-2" id="field_custom_end" style="display:none;">
+                <label class="form-label">End Date</label>
+                <input type="date" name="end_date" class="form-control">
+              </div>
+
+              <div class="col-12 mt-3">
                 <button class="btn btn-success"><i class="bi bi-bar-chart me-1"></i> Generate Report</button>
                 <a href="../public/index.php" class="btn btn-outline-secondary">Cancel</a>
               </div>
@@ -72,16 +172,35 @@ if (!$selectedYear) {
 
         <div class="footer-text mt-3">© <?= date('Y') ?> Pakistan Institute of Development Economics (PIDE)</div>
       </main>
+
+      <script>
+        (function(){
+          const form = document.getElementById('rangeForm');
+          const radios = form.querySelectorAll('input[name="period"]');
+          const show = name => {
+            document.getElementById('field_week').style.display = name==='week' ? '' : 'none';
+            document.getElementById('field_month').style.display = name==='month' ? '' : 'none';
+            document.getElementById('field_year').style.display = name==='year' ? '' : 'none';
+            document.getElementById('field_custom').style.display = name==='custom' ? '' : 'none';
+            document.getElementById('field_custom_end').style.display = name==='custom' ? '' : 'none';
+          };
+          radios.forEach(r=>r.addEventListener('change', e=> show(e.target.value)));
+          // set initial
+          show(document.querySelector('input[name="period"]:checked').value);
+        })();
+      </script>
     </body>
     </html>
     <?php
     exit;
 }
 
-// ---- Year selected: compute time range in UTC ----
-$year = $selectedYear;
-$startUtc = sprintf('%04d-01-01 00:00:00', $year);
-$endUtc   = sprintf('%04d-12-31 23:59:59', $year);
+// ---- Use computed range from request ----
+$startUtc = $range['startUtc'];
+$endUtc   = $range['endUtc'];
+$reportLabel = $range['label'] ?? '';
+// file suffix (year) for exports: use start year
+$fileYear = date('Y', strtotime($startUtc));
 
 // ---- Per-user counts (include users with zero via LEFT JOIN) ----
 $perUserStmt = $pdo->prepare("
@@ -120,7 +239,7 @@ $trendCounts = array_map(fn($r) => (int)$r['total'], $trend);
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <title>PIDE Webinar Portal — Reports (<?= htmlspecialchars((string)$year) ?>)</title>
+  <title>PIDE Webinar Portal — Reports (<?= htmlspecialchars((string)$reportLabel) ?>)</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
   <!-- Bootstrap -->
@@ -157,7 +276,7 @@ $trendCounts = array_map(fn($r) => (int)$r['total'], $trend);
   <div class="d-flex justify-content-between align-items-center mb-3">
     <h4 class="calendar-title m-0">
       <i class="bi bi-graph-up-arrow"></i>
-      Webinar Performance Reports — <?= htmlspecialchars((string)$year) ?>
+      Webinar Performance Reports — <?= htmlspecialchars((string)$reportLabel) ?>
     </h4>
     <div class="no-print">
       <a href="reports.php" class="btn btn-outline-secondary me-2"><i class="bi bi-arrow-left"></i> Change Year</a>
@@ -206,7 +325,7 @@ $trendCounts = array_map(fn($r) => (int)$r['total'], $trend);
           <thead style="background: var(--pide-green); color:#fff;">
             <tr>
               <th>User</th>
-              <th>Total Webinars Hosted (<?= htmlspecialchars((string)$year) ?>)</th>
+              <th>Total Webinars Hosted (<?= htmlspecialchars((string)$reportLabel) ?>)</th>
             </tr>
           </thead>
           <tbody>
@@ -328,7 +447,7 @@ $trendCounts = array_map(fn($r) => (int)$r['total'], $trend);
       heightLeft -= pageHeight;
     }
 
-    pdf.save('PIDE_Webinar_Reports_<?= (int)$year ?>.pdf');
+    pdf.save('PIDE_Webinar_Reports_<?= htmlspecialchars($fileYear) ?>.pdf');
     root.classList.remove('exporting');
   });
 })();

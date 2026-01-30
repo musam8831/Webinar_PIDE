@@ -7,6 +7,7 @@ $payload = json_decode(file_get_contents('php://input'), true) ?? [];
 $id=(int)($payload['id']??0);
 $title=trim($payload['title']??'');
 $category_id=(int)($payload['category_id']??0);
+$description=$payload['description']??null;
 $start=$payload['start']??'';
 $end=$payload['end']??'';
 
@@ -61,7 +62,7 @@ if ((int)$ov->fetchColumn()>0){
     exit;
 }
 
-$upd=$pdo->prepare('UPDATE webinars SET title=?, category_id=?, start_at=?, end_at=? WHERE id=?');
-$upd->execute([$title, $category_id, $startUtc, $endUtc, $id]);
+$upd=$pdo->prepare('UPDATE webinars SET title=?, description=?, category_id=?, start_at=?, end_at=? WHERE id=?');
+$upd->execute([$title, $description, $category_id, $startUtc, $endUtc, $id]);
 echo json_encode(['ok'=>true]);
 

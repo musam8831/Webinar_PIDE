@@ -15,6 +15,7 @@ echo json_encode([
   'id'=>$row['id'],
   'title'=>$row['title'],
   'category_id'=>$row['category_id'],
+  'description'=>$row['description'] ?? '',
   'start'=>gmdate('Y-m-d H:i', strtotime($row['start_at'])),
   'end'=>gmdate('Y-m-d H:i', strtotime($row['end_at'])),
   'start_local'=>(new DateTime($row['start_at'].' UTC'))->setTimezone(new DateTimeZone(date_default_timezone_get()))->format('Y-m-d\TH:i'),
